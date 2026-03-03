@@ -1,8 +1,8 @@
 # XYLon Living Forest 🌲❄️
 
-A high-performance, immersive 3D interactive experience built with **React Three Fiber**, **Three.js**, and **WebGL**. This project features a procedurally generated forest, a dynamic particle snow system, and atmospheric audio, all optimized for modern web browsers.
+English | [简体中文](./README_zh-CN.md)
 
-![Project Preview](https://via.placeholder.com/800x400?text=XYLon+Living+Forest+Preview)
+A high-performance, immersive 3D interactive experience built with **React Three Fiber**, **Three.js**, and **WebGL**. This project features a procedurally generated forest, a dynamic particle snow system, and atmospheric audio, all optimized for modern web browsers.
 
 ## ✨ Core Features
 
@@ -32,7 +32,7 @@ A high-performance, immersive 3D interactive experience built with **React Three
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/ycsy520e/xylon-living-forest.git
+    git clone https://github.com/ycsy520/XYLon-Living-Forest-Final.git
     cd xylon-living-forest
     ```
 
