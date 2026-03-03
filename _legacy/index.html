@@ -1,0 +1,1104 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0"
+        />
+        <title>XYLon | Living Forest (SOTD Edition)</title>
+
+        <!-- Core Libraries -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+        <script src="https://unpkg.com/lenis@1.0.42/dist/lenis.min.js"></script>
+
+        <!-- Post-Processing -->
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FilmShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/FXAAShader.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/FilmPass.js"></script>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300&display=swap"
+            rel="stylesheet"
+        />
+
+        <style>
+            :root {
+                --bg-color: #020617; /* Dark Slate 950 - Deep Sea Blue */
+                --text-color: #e4e4e4;
+                --accent-color: #38bdf8; /* Sky 400 - Cyan Tint */
+            }
+
+            body {
+                margin: 0;
+                background: linear-gradient(to bottom, #020617, #0f172a); /* Deep Sea Gradient */
+                color: var(--text-color);
+                font-family: "Inter", sans-serif;
+                overflow: hidden;
+                cursor: none;
+                -webkit-user-select: none;
+                user-select: none;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            h1,
+            h2,
+            h3,
+            .brand-font {
+                font-family: "Syne", sans-serif;
+            }
+            .mono-font {
+                font-family: "JetBrains Mono", monospace;
+            }
+
+            /* --- CINEMATIC LOADER --- */
+            #loader {
+                position: fixed;
+                inset: 0;
+                z-index: 10000;
+                background-color: #000;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1);
+            }
+
+            .loader-content {
+                position: relative;
+                width: 300px;
+                height: 100px;
+                text-align: center;
+            }
+
+            .decode-text {
+                font-family: "Syne", sans-serif;
+                font-size: 3rem;
+                font-weight: 800;
+                letter-spacing: 0.2em;
+                color: #fff;
+                text-transform: uppercase;
+            }
+
+            .loader-meta {
+                position: absolute;
+                bottom: 40px;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 40px;
+                font-size: 10px;
+                color: rgba(255, 255, 255, 0.4);
+                text-transform: uppercase;
+            }
+
+            .loader-progress-wrap {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 2px;
+                background: rgba(255, 255, 255, 0.1);
+            }
+            .loader-progress-bar {
+                height: 100%;
+                width: 0%;
+                background: #fff;
+                transition: width 0.1s linear;
+            }
+
+            #enter-btn {
+                position: absolute;
+                top: 60%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                padding: 15px 40px;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 50px;
+                font-family: "JetBrains Mono", monospace;
+                font-size: 12px;
+                letter-spacing: 0.1em;
+                color: #fff;
+                background: transparent;
+                cursor: none; /* Hide native cursor to use custom one */
+                opacity: 0;
+                pointer-events: none;
+                transition: all 0.4s ease;
+                overflow: hidden;
+            }
+            #enter-btn::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: #fff;
+                transform: scaleX(0);
+                transform-origin: right;
+                transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+                z-index: -1;
+            }
+            #enter-btn:hover {
+                color: #000;
+                border-color: #fff;
+            }
+            #enter-btn:hover::before {
+                transform: scaleX(1);
+                transform-origin: left;
+            }
+
+            /* --- UI & CANVAS --- */
+            .grain-overlay {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 900;
+                opacity: 0.04;
+                display: none;
+                background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            }
+
+            /* UPDATED Z-INDEX: 10001 to stay above Loader (10000) */
+            #cursor {
+                position: fixed;
+                width: 20px;
+                height: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 10001;
+                transform: translate(-50%, -50%);
+                mix-blend-mode: difference;
+                transition:
+                    width 0.4s cubic-bezier(0.19, 1, 0.22, 1),
+                    height 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            }
+            #cursor-dot {
+                position: fixed;
+                width: 4px;
+                height: 4px;
+                background: #fff;
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 10001;
+                transform: translate(-50%, -50%);
+            }
+
+            body.hovered #cursor {
+                width: 60px;
+                height: 60px;
+                background: rgba(255, 255, 255, 0.1);
+                border-color: transparent;
+                -webkit-backdrop-filter: blur(4px);
+                backdrop-filter: blur(4px);
+            }
+
+            /* Mobile Adjustments */
+            @media (max-width: 768px) {
+                #cursor,
+                #cursor-dot {
+                    display: none !important;
+                }
+                .title-glitch {
+                    font-size: 15vw !important;
+                }
+                .title-outline {
+                    font-size: 15vw !important;
+                    margin-left: 5vw !important;
+                }
+            }
+
+            #canvas-container {
+                position: fixed;
+                inset: 0;
+                z-index: -1;
+            }
+            .ui-layer {
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                z-index: 10;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 0 5vw;
+            }
+            .pointer-events-auto {
+                pointer-events: auto;
+            }
+
+            .title-glitch {
+                color: #fff;
+                mix-blend-mode: overlay;
+                position: relative;
+            }
+            .title-outline {
+                color: transparent;
+                -webkit-text-stroke: 1px rgba(148, 163, 184, 0.6); /* Cool Slate Grey */
+                position: relative;
+                z-index: 1;
+            }
+            .title-outline::after {
+                content: "Forest";
+                position: absolute;
+                left: 3px;
+                top: 3px;
+                color: transparent;
+                -webkit-text-stroke: 1.5px rgba(56, 189, 248, 0.3); /* Subtle Cyan Tint */
+                z-index: -1;
+                mix-blend-mode: screen;
+            }
+
+            .scroll-indicator {
+                position: fixed;
+                bottom: 40px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                opacity: 0;
+                animation: fadeUp 1s 2s forwards;
+            }
+            .scroll-line {
+                width: 1px;
+                height: 40px;
+                background: linear-gradient(to bottom, #fff, transparent);
+            }
+
+            @keyframes fadeUp {
+                to {
+                    opacity: 0.5;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- HIGH-END LOADER -->
+        <div id="loader">
+            <div class="loader-content">
+                <div class="decode-text" id="decode-target">XYLON</div>
+            </div>
+            <!-- Added hover-target class for cursor interaction -->
+            <button id="enter-btn" class="hover-target">
+                ENTER EXPERIENCE
+            </button>
+
+            <div class="loader-meta">
+                <span class="mono-font" id="loader-status"
+                    >INITIALIZING SYSTEM...</span
+                >
+                <span class="mono-font" id="loader-percent">0%</span>
+            </div>
+            <div class="loader-progress-wrap">
+                <div class="loader-progress-bar" id="loader-bar"></div>
+            </div>
+        </div>
+
+        <div id="cursor"></div>
+        <div id="cursor-dot"></div>
+        <div class="grain-overlay"></div>
+
+        <!-- MAIN UI -->
+        <nav
+            class="fixed top-0 left-0 w-full px-6 py-6 md:px-8 md:py-8 flex justify-between items-center z-50 mix-blend-difference text-white pointer-events-auto"
+        >
+            <a
+                href="#"
+                class="text-sm md:text-lg font-bold tracking-[0.2em] brand-font hover-target opacity-0 intro-anim"
+                >XYLON</a
+            >
+            <div
+                class="flex gap-4 md:gap-8 text-[10px] md:text-xs uppercase tracking-widest opacity-0 intro-anim"
+            >
+                <span>Vol. 03</span>
+                <span
+                    id="audio-status"
+                    class="cursor-pointer hover:text-indigo-400 transition-colors"
+                    >[ SOUND OFF ]</span
+                >
+            </div>
+        </nav>
+
+        <div id="canvas-container"></div>
+
+        <div class="ui-layer">
+            <div class="overflow-hidden mb-2 md:mb-4">
+                <p
+                    class="text-[10px] md:text-sm uppercase tracking-[0.2em] opacity-60 hero-anim text-white mix-blend-difference"
+                >
+                    Digital Ecosystem
+                </p>
+            </div>
+
+            <div class="relative">
+                <h1
+                    id="title-living"
+                    class="text-[12vw] leading-[0.85] font-bold uppercase brand-font title-glitch intro-anim opacity-0 translate-y-20"
+                >
+                    Living
+                </h1>
+                <h1
+                    id="title-forest"
+                    class="text-[12vw] leading-[0.85] font-bold uppercase brand-font ml-[15vw] title-outline intro-anim opacity-0 translate-y-20"
+                    style="margin-top: -2vw"
+                >
+                    Forest
+                </h1>
+            </div>
+
+            <div
+                class="max-w-xs mt-8 md:mt-12 intro-anim opacity-0 translate-y-10 pointer-events-auto mix-blend-difference text-white"
+            >
+                <p
+                    class="text-[10px] md:text-xs leading-loose opacity-90 font-light tracking-wide mono-font"
+                >
+                    // SYSTEM READY<br />
+                    <span class="text-indigo-300">SCROLL</span> TO EXPLORE<br />
+                    <span class="text-indigo-300">MOVE</span> TO OBSERVE
+                </p>
+            </div>
+        </div>
+
+        <div class="scroll-indicator intro-anim">
+            <span class="text-[10px] tracking-widest uppercase">Explore</span>
+            <div class="scroll-line"></div>
+        </div>
+
+        <script>
+            // --- 0. INTELLIGENT CONFIG ---
+            const isMobile =
+                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+                    navigator.userAgent,
+                );
+
+            const CONFIG = {
+                // Adaptive Quality
+                snowCount: isMobile ? 2000 : 8000,
+                treeCount: isMobile ? 60 : 180,
+                shadows: !isMobile,
+                fogDensity: isMobile ? 0.04 : 0.02,
+                camZStart: isMobile ? 40 : 35,
+                camZEnd: 5,
+                pixelRatio: Math.min(
+                    window.devicePixelRatio,
+                    isMobile ? 1.5 : 2,
+                ),
+            };
+
+            // --- 1. LOADER & DECODER ---
+            const Loader = {
+                init() {
+                    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+                    const target = document.getElementById("decode-target");
+                    const originalText = target.innerText;
+                    let iterations = 0;
+
+                    // Decode Animation
+                    const interval = setInterval(() => {
+                        target.innerText = originalText
+                            .split("")
+                            .map((letter, index) => {
+                                if (index < iterations)
+                                    return originalText[index];
+                                return chars[
+                                    Math.floor(Math.random() * chars.length)
+                                ];
+                            })
+                            .join("");
+
+                        if (iterations >= originalText.length)
+                            clearInterval(interval);
+                        iterations += 1 / 3;
+                    }, 30);
+
+                    // Progress Simulation
+                    let p = 0;
+                    const bar = document.getElementById("loader-bar");
+                    const percent = document.getElementById("loader-percent");
+                    const btn = document.getElementById("enter-btn");
+                    const status = document.getElementById("loader-status");
+
+                    // Simulate asset loading
+                    const loadInt = setInterval(() => {
+                        p += Math.random() * 8;
+                        if (p > 100) p = 100;
+
+                        bar.style.width = p + "%";
+                        percent.innerText = Math.floor(p) + "%";
+
+                        if (p === 100) {
+                            clearInterval(loadInt);
+                            status.innerText = "SYSTEM READY";
+                            // Show Enter Button
+                            gsap.to(btn, {
+                                opacity: 1,
+                                pointerEvents: "all",
+                                duration: 0.5,
+                            });
+
+                            // Bind Click
+                            btn.addEventListener("click", () => {
+                                this.enterExperience();
+                            });
+                        }
+                    }, 100);
+                },
+
+                enterExperience() {
+                    // Request Permissions & Init Audio
+                    if (
+                        isMobile &&
+                        typeof DeviceOrientationEvent !== "undefined" &&
+                        typeof DeviceOrientationEvent.requestPermission ===
+                            "function"
+                    ) {
+                        DeviceOrientationEvent.requestPermission().catch(
+                            console.error,
+                        );
+                    }
+                    AudioEngine.resume();
+
+                    // Hide Loader
+                    gsap.to("#loader", {
+                        yPercent: -100,
+                        duration: 1.2,
+                        ease: "expo.inOut",
+                        onComplete: () =>
+                            (document.getElementById("loader").style.display =
+                                "none"),
+                    });
+
+                    // Intro Animations
+                    gsap.to(".intro-anim", {
+                        y: 0,
+                        opacity: 1,
+                        duration: 1.5,
+                        stagger: 0.1,
+                        delay: 0.3,
+                        ease: "power4.out",
+                    });
+                },
+            };
+
+            // --- 2. AUDIO ENGINE ---
+            const AudioEngine = {
+                ctx: null,
+                gain: null,
+                filter: null,
+                playing: false,
+
+                init() {
+                    const AC = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AC();
+                    this.gain = this.ctx.createGain();
+                    this.gain.connect(this.ctx.destination);
+                    this.gain.gain.value = 0;
+                    this.setupWind();
+                },
+
+                resume() {
+                    if (!this.ctx) this.init();
+                    if (this.ctx.state === "suspended") this.ctx.resume();
+                    this.toggle(true);
+                },
+
+                setupWind() {
+                    const bufferSize = 2 * this.ctx.sampleRate;
+                    const buffer = this.ctx.createBuffer(
+                        1,
+                        bufferSize,
+                        this.ctx.sampleRate,
+                    );
+                    const data = buffer.getChannelData(0);
+                    let lastOut = 0;
+                    for (let i = 0; i < bufferSize; i++) {
+                        const white = Math.random() * 2 - 1;
+                        data[i] = (lastOut + 0.02 * white) / 1.02;
+                        lastOut = data[i];
+                        data[i] *= 3.5;
+                    }
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    noise.loop = true;
+                    this.filter = this.ctx.createBiquadFilter();
+                    this.filter.type = "lowpass";
+                    this.filter.frequency.value = 400;
+                    noise.connect(this.filter);
+                    this.filter.connect(this.gain);
+                    noise.start();
+                },
+
+                toggle(forceState) {
+                    if (forceState !== undefined) this.playing = forceState;
+                    else this.playing = !this.playing;
+
+                    const now = this.ctx.currentTime;
+                    this.gain.gain.setTargetAtTime(
+                        this.playing ? 0.2 : 0,
+                        now,
+                        1.5,
+                    );
+                    document.getElementById("audio-status").innerText = this
+                        .playing
+                        ? "[ SOUND ON ]"
+                        : "[ SOUND OFF ]";
+                },
+
+                update(velocity) {
+                    if (!this.playing || !this.filter) return;
+                    const freq = 300 + Math.min(velocity * 1000, 1000);
+                    this.filter.frequency.setTargetAtTime(
+                        freq,
+                        this.ctx.currentTime,
+                        0.1,
+                    );
+                },
+            };
+
+            // --- 3. INPUT & PARALLAX ---
+            const Input = {
+                x: 0,
+                y: 0,
+                targetX: 0,
+                targetY: 0,
+
+                init() {
+                    if (isMobile) {
+                        window.addEventListener(
+                            "deviceorientation",
+                            this.onGyro.bind(this),
+                        );
+                        window.addEventListener(
+                            "touchmove",
+                            this.onTouch.bind(this),
+                            { passive: false },
+                        );
+                    } else {
+                        window.addEventListener(
+                            "mousemove",
+                            this.onMouse.bind(this),
+                        );
+                        this.initCustomCursor();
+                    }
+
+                    // Add hover listeners to dynamically created/existing elements
+                    document.querySelectorAll(".hover-target").forEach((el) => {
+                        el.addEventListener("mouseenter", () =>
+                            document.body.classList.add("hovered"),
+                        );
+                        el.addEventListener("mouseleave", () =>
+                            document.body.classList.remove("hovered"),
+                        );
+                    });
+
+                    document
+                        .getElementById("audio-status")
+                        .addEventListener("click", () => AudioEngine.toggle());
+                },
+
+                initCustomCursor() {
+                    const c = document.getElementById("cursor");
+                    const d = document.getElementById("cursor-dot");
+                    let cx = 0,
+                        cy = 0,
+                        tx = 0,
+                        ty = 0;
+
+                    window.addEventListener("mousemove", (e) => {
+                        tx = e.clientX;
+                        ty = e.clientY;
+                    });
+
+                    const loop = () => {
+                        cx += (tx - cx) * 0.15;
+                        cy += (ty - cy) * 0.15;
+                        c.style.transform = `translate(${cx}px, ${cy}px) translate(-50%, -50%)`;
+                        d.style.transform = `translate(${tx}px, ${ty}px) translate(-50%, -50%)`;
+                        requestAnimationFrame(loop);
+                    };
+                    loop();
+                },
+
+                onMouse(e) {
+                    this.targetX = (e.clientX / window.innerWidth) * 2 - 1;
+                    this.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+                    this.animateParallax();
+                },
+
+                onGyro(e) {
+                    const x = Math.min(Math.max(e.gamma, -30), 30) / 30;
+                    const y = Math.min(Math.max(e.beta, -30), 30) / 30;
+                    this.targetX = x;
+                    this.targetY = -y;
+                },
+
+                onTouch(e) {
+                    const t = e.touches[0];
+                    this.targetX = (t.clientX / window.innerWidth) * 2 - 1;
+                    this.targetY = -(t.clientY / window.innerHeight) * 2 + 1;
+                },
+
+                animateParallax() {
+                    if (!isMobile) {
+                        const l = document.getElementById("title-living");
+                        const f = document.getElementById("title-forest");
+                        if (l && f) {
+                            gsap.to(l, {
+                                x: this.targetX * 30,
+                                y: -this.targetY * 15,
+                                duration: 1,
+                            });
+                            gsap.to(f, {
+                                x: this.targetX * 60,
+                                y: -this.targetY * 30,
+                                duration: 1,
+                            });
+                        }
+                    }
+                },
+
+                update() {
+                    this.x += (this.targetX - this.x) * 0.05;
+                    this.y += (this.targetY - this.y) * 0.05;
+                },
+            };
+
+            // --- 4. 3D EXPERIENCE ---
+            const App = {
+                scene: null,
+                camera: null,
+                renderer: null,
+                composer: null,
+                clock: null,
+                mouse: new THREE.Vector2(),
+                targetMouse: new THREE.Vector2(),
+                scroll: 0,
+                targetScroll: 0,
+                lenis: null,
+                fxaaPass: null,
+
+                objects: {
+                    forest: null,
+                    monolith: null,
+                    snow: null,
+                    ground: null,
+                },
+
+                init() {
+                    Loader.init();
+                    Input.init();
+                    this.initThree();
+                    this.setupLenis();
+                },
+
+                setupLenis() {
+                    if (typeof Lenis !== "undefined") {
+                        this.lenis = new Lenis({ duration: 1.5, smooth: true });
+                        this.lenis.on("scroll", ({ scroll, limit }) => {
+                            this.targetScroll = limit > 0 ? scroll / limit : 0;
+                            AudioEngine.update(this.lenis.velocity * 0.005);
+                        });
+                    } else {
+                        window.addEventListener("wheel", (e) => {
+                            this.targetScroll += e.deltaY * 0.001;
+                            this.targetScroll = Math.max(
+                                0,
+                                Math.min(1, this.targetScroll),
+                            );
+                        });
+                    }
+                },
+
+                initThree() {
+                    const container =
+                        document.getElementById("canvas-container");
+
+                    this.clock = new THREE.Clock();
+
+                    this.scene = new THREE.Scene();
+                    // Fog color updated to Deep Blue (Slate 900)
+                    this.scene.fog = new THREE.FogExp2(
+                        0x0f172a,
+                        CONFIG.fogDensity,
+                    );
+
+                    this.camera = new THREE.PerspectiveCamera(
+                        45,
+                        window.innerWidth / window.innerHeight,
+                        0.1,
+                        100,
+                    );
+                    this.camera.position.set(0, 12, CONFIG.camZStart);
+
+                    // Enable alpha to let CSS gradient show through
+                    this.renderer = new THREE.WebGLRenderer({
+                        alpha: true,
+                        antialias: !CONFIG.shadows,
+                        powerPreference: "high-performance",
+                    });
+                    this.renderer.setSize(
+                        window.innerWidth,
+                        window.innerHeight,
+                    );
+                    this.renderer.setPixelRatio(CONFIG.pixelRatio);
+                    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+                    if (CONFIG.shadows) {
+                        this.renderer.shadowMap.enabled = true;
+                        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                    }
+
+                    container.appendChild(this.renderer.domElement);
+
+                    if (!isMobile) {
+                        this.composer = new THREE.EffectComposer(this.renderer);
+                        this.composer.addPass(
+                            new THREE.RenderPass(this.scene, this.camera),
+                        );
+
+                        const bloom = new THREE.UnrealBloomPass(
+                            new THREE.Vector2(
+                                window.innerWidth,
+                                window.innerHeight,
+                            ),
+                            1.0,
+                            0.8,
+                            0.9,
+                        );
+                        this.composer.addPass(bloom);
+
+                        // const film = new THREE.FilmPass(
+                        //     0.15,
+                        //     0.025,
+                        //     648,
+                        //     false,
+                        // );
+                        // this.composer.addPass(film);
+
+                        this.fxaaPass = new THREE.ShaderPass(THREE.FXAAShader);
+                        this.fxaaPass.material.uniforms["resolution"].value.x =
+                            1 / (window.innerWidth * CONFIG.pixelRatio);
+                        this.fxaaPass.material.uniforms["resolution"].value.y =
+                            1 / (window.innerHeight * CONFIG.pixelRatio);
+                        this.composer.addPass(this.fxaaPass);
+                    }
+
+                    this.setupLights();
+                    this.createWorld();
+
+                    window.addEventListener("resize", this.onResize.bind(this));
+                    this.animate();
+                },
+
+                setupLights() {
+                    const ambient = new THREE.AmbientLight(0x404060, 0.6);
+                    this.scene.add(ambient);
+
+                    const spot = new THREE.SpotLight(
+                        0xaabbff,
+                        8,
+                        50,
+                        Math.PI * 0.3,
+                        0.5,
+                        1,
+                    );
+                    spot.position.set(5, 15, 5);
+                    if (CONFIG.shadows) {
+                        spot.castShadow = true;
+                        spot.shadow.mapSize.width = 1024;
+                        spot.shadow.mapSize.height = 1024;
+                    }
+                    this.scene.add(spot);
+                },
+
+                createWorld() {
+                    // 1. Monolith
+                    const geo = new THREE.IcosahedronGeometry(2.5, 0);
+                    const mat = new THREE.MeshPhysicalMaterial({
+                        color: 0x050505,
+                        roughness: 0.1,
+                        metalness: 0.9,
+                        transmission: 0.2,
+                        emissive: 0x0ea5e9, // Sky 500
+                        emissiveIntensity: 0.5,
+                        flatShading: true,
+                    });
+                    this.monolith = new THREE.Mesh(geo, mat);
+                    this.monolith.position.set(0, 1, 0);
+
+                    const wires = new THREE.LineSegments(
+                        new THREE.WireframeGeometry(geo),
+                        new THREE.LineBasicMaterial({
+                            color: 0x38bdf8, // Sky 400
+                            opacity: 0.3,
+                            transparent: true,
+                        }),
+                    );
+                    wires.scale.set(1.05, 1.05, 1.05);
+                    this.monolith.add(wires);
+                    this.scene.add(this.monolith);
+
+                    // 2. Forest (Instanced)
+                    const treeGeo = new THREE.ConeGeometry(1, 1, 8, 12, true);
+                    treeGeo.translate(0, 0.5, 0);
+                    const treeMat = new THREE.ShaderMaterial({
+                        uniforms: {
+                            uTime: { value: 0 },
+                            uColor: { value: new THREE.Color(0x0f172a) },
+                            uTopColor: { value: new THREE.Color(0xffffff) },
+                            uInput: { value: new THREE.Vector3(0, 0, 0) },
+                        },
+                        vertexShader: `
+                        uniform float uTime;
+                        uniform vec3 uInput;
+                        varying float vHeight;
+                        void main() {
+                            vec3 pos = position;
+                            pos.y *= 12.0; pos.x *= 3.5 * (1.0 - pos.y/13.0); pos.z *= 3.5 * (1.0 - pos.y/13.0);
+                            vec4 wPos = instanceMatrix * vec4(0.0,0.0,0.0,1.0);
+                            float dist = distance(wPos.xz, uInput.xz);
+                            float interact = smoothstep(10.0, 0.0, dist);
+                            float wind = sin(uTime * 0.8 + wPos.x * 0.3) * 0.1;
+                            pos.x += (pos.y * 0.1) * (wind + interact * 0.2);
+                            vHeight = pos.y;
+                            gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
+                        }
+                    `,
+                        fragmentShader: `
+                        uniform vec3 uColor; uniform vec3 uTopColor; varying float vHeight;
+                        void main() {
+                            float m = smoothstep(2.0, 10.0, vHeight);
+                            gl_FragColor = vec4(mix(uColor, uTopColor, m * 0.8), 1.0);
+                        }
+                    `,
+                        side: THREE.DoubleSide,
+                    });
+                    this.forest = new THREE.InstancedMesh(
+                        treeGeo,
+                        treeMat,
+                        CONFIG.treeCount,
+                    );
+                    if (CONFIG.shadows) {
+                        this.forest.castShadow = true;
+                        this.forest.receiveShadow = true;
+                    }
+
+                    const dummy = new THREE.Object3D();
+                    for (let i = 0; i < CONFIG.treeCount; i++) {
+                        const angle = Math.random() * Math.PI * 2;
+                        const r = 10 + Math.random() * 40;
+                        dummy.position.set(
+                            Math.cos(angle) * r,
+                            -1,
+                            Math.sin(angle) * r,
+                        );
+                        const s = 0.5 + Math.random();
+                        dummy.scale.set(s, s, s);
+                        dummy.rotation.y = Math.random() * Math.PI;
+                        dummy.updateMatrix();
+                        this.forest.setMatrixAt(i, dummy.matrix);
+                    }
+                    this.scene.add(this.forest);
+
+                    // 3. Snow
+                    const snowGeo = new THREE.BufferGeometry();
+                    const pos = [],
+                        rnd = [];
+                    for (let i = 0; i < CONFIG.snowCount; i++) {
+                        pos.push(
+                            (Math.random() - 0.5) * 100,
+                            Math.random() * 60 - 10,
+                            (Math.random() - 0.5) * 100,
+                        );
+                        rnd.push(Math.random());
+                    }
+                    snowGeo.setAttribute(
+                        "position",
+                        new THREE.Float32BufferAttribute(pos, 3),
+                    );
+                    snowGeo.setAttribute(
+                        "aRandom",
+                        new THREE.Float32BufferAttribute(rnd, 1),
+                    );
+
+                    const snowMat = new THREE.ShaderMaterial({
+                        uniforms: {
+                            uTime: { value: 0 },
+                            uScroll: { value: 0 },
+                            uInput: { value: new THREE.Vector3() },
+                        },
+                        transparent: true,
+                        depthWrite: false,
+                        blending: THREE.AdditiveBlending,
+                        vertexShader: `
+                        uniform float uTime; uniform float uScroll; uniform vec3 uInput;
+                        attribute float aRandom; 
+                        varying float vAlpha;
+                        varying vec3 vColor;
+                        varying float vBokeh;
+
+                        void main() {
+                            vec3 pos = position;
+                            pos.y -= uTime * (5.0 + aRandom * 5.0 + uScroll * 20.0);
+                            pos.x += sin(uTime + aRandom * 10.0) * 0.5;
+                            // Repel
+                            float d = distance(pos.xz, uInput.xz);
+                            vec3 dir = normalize(pos - uInput);
+                            pos += dir * smoothstep(15.0, 0.0, d) * 5.0;
+
+                            pos.y = mod(pos.y + 20.0, 60.0) - 20.0;
+                            vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+                            
+                            // Enhanced Size Variation for Depth
+                            float sizeBase = 4.0 + aRandom * 16.0;
+                            gl_PointSize = sizeBase * (30.0 / -mv.z);
+                            
+                            gl_Position = projectionMatrix * mv;
+                            vAlpha = smoothstep(-20.0, -5.0, pos.y);
+                            
+                            // Deep Sea Color Grading: Cold Blue to Warm White
+                            vec3 colorCold = vec3(0.4, 0.6, 0.9); // Cool Cyan/Blue
+                            vec3 colorWarm = vec3(0.9, 0.95, 1.0); // Warm/White
+                            vColor = mix(colorCold, colorWarm, aRandom);
+                            
+                            vBokeh = aRandom; // Use random as bokeh factor
+                        }
+                    `,
+                        fragmentShader: `
+                        varying float vAlpha;
+                        varying vec3 vColor;
+                        varying float vBokeh;
+
+                        void main() {
+                            vec2 uv = gl_PointCoord - 0.5;
+                            float dist = length(uv);
+                            
+                            // Bokeh Effect: Softer edges for "out of focus" particles
+                            float edgeSoftness = 0.05 + vBokeh * 0.45;
+                            float circle = 1.0 - smoothstep(0.5 - edgeSoftness, 0.5, dist);
+                            
+                            if(circle < 0.01) discard;
+                            
+                            // Combine alpha, circle shape and bokeh dimming
+                            gl_FragColor = vec4(vColor, vAlpha * circle * (0.6 + vBokeh * 0.2));
+                        }
+                    `,
+                    });
+                    this.snow = new THREE.Points(snowGeo, snowMat);
+                    this.scene.add(this.snow);
+
+                    // 4. Ground
+                    const groundMat = new THREE.MeshStandardMaterial({
+                        color: 0x050508,
+                        roughness: 0.4,
+                        metalness: 0.6,
+                    });
+                    const ground = new THREE.Mesh(
+                        new THREE.PlaneGeometry(200, 200, 32, 32),
+                        groundMat,
+                    );
+                    ground.rotation.x = -Math.PI / 2;
+                    ground.position.y = -1.5;
+                    if (CONFIG.shadows) ground.receiveShadow = true;
+                    this.scene.add(ground);
+                },
+
+                onResize() {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(
+                        window.innerWidth,
+                        window.innerHeight,
+                    );
+
+                    if (this.composer) {
+                        this.composer.setSize(
+                            window.innerWidth,
+                            window.innerHeight,
+                        );
+                        if (this.fxaaPass) {
+                            this.fxaaPass.material.uniforms[
+                                "resolution"
+                            ].value.x =
+                                1 / (window.innerWidth * CONFIG.pixelRatio);
+                            this.fxaaPass.material.uniforms[
+                                "resolution"
+                            ].value.y =
+                                1 / (window.innerHeight * CONFIG.pixelRatio);
+                        }
+                    }
+                },
+
+                animate() {
+                    requestAnimationFrame(this.animate.bind(this));
+
+                    const time = this.clock.getElapsedTime();
+                    if (this.lenis) this.lenis.raf(performance.now());
+
+                    Input.update();
+                    this.scroll += (this.targetScroll - this.scroll) * 0.05;
+
+                    // Logic
+                    this.camera.position.z = THREE.MathUtils.lerp(
+                        CONFIG.camZStart,
+                        CONFIG.camZEnd,
+                        this.scroll,
+                    );
+
+                    // UPDATED: Parallax Camera Logic
+                    this.camera.position.x = Input.x * 2.0;
+                    this.camera.position.y = 12 - Input.y * 3.0;
+                    this.camera.lookAt(0, 1, 0);
+
+                    if (this.monolith) {
+                        this.monolith.rotation.y = time * 0.1;
+                        this.monolith.position.y = 1 + Math.sin(time) * 0.2;
+                    }
+
+                    // Update Shader Uniforms
+                    const inputVec = new THREE.Vector3(
+                        Input.x * 20,
+                        5,
+                        -Input.y * 10,
+                    );
+                    if (this.forest) {
+                        this.forest.material.uniforms.uTime.value = time;
+                        this.forest.material.uniforms.uInput.value.copy(
+                            inputVec,
+                        );
+                    }
+                    if (this.snow) {
+                        this.snow.material.uniforms.uTime.value = time;
+                        this.snow.material.uniforms.uScroll.value = Math.abs(
+                            this.targetScroll - this.scroll,
+                        );
+                        this.snow.material.uniforms.uInput.value.set(
+                            inputVec.x,
+                            0,
+                            this.camera.position.z - 10,
+                        );
+                    }
+
+                    if (this.composer) this.composer.render();
+                    else this.renderer.render(this.scene, this.camera);
+                },
+            };
+
+            // Start
+            window.addEventListener("load", () => App.init());
+        </script>
+    </body>
+</html>

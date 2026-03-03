@@ -1,0 +1,22 @@
+{
+  "name": "XYLon | Living Forest",
+  "short_name": "XYLon",
+  "description": "An immersive WebGL experience exploring a procedural winter ecosystem.",
+  "start_url": "/XYLon_Living_Forest_Final.html",
+  "display": "standalone",
+  "background_color": "#050608",
+  "theme_color": "#050608",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/4f46e5/ffffff?text=XY",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/4f46e5/ffffff?text=XYLon",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

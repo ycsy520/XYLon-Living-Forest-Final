@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --font-syne: "Syne", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-bg-color: #020617;
+  --color-text-color: #e4e4e4;
+  --color-accent-color: #38bdf8;
+}
+
+@layer base {
+  :root {
+    --bg-color: var(--color-bg-color);
+    --text-color: var(--color-text-color);
+    --accent-color: var(--color-accent-color);
+  }
+
+  html, body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(to bottom, #020617, #0f172a); /* Deep Sea Gradient */
+    background-attachment: fixed;
+    color: var(--text-color);
+    font-family: "Inter", sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .brand-font {
+    font-family: var(--font-syne);
+  }
+  
+  .mono-font {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  .title-glitch {
+    color: #fff;
+    mix-blend-mode: overlay;
+    position: relative;
+  }
+  
+  .title-outline {
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(148, 163, 184, 0.6); /* Cool Slate Grey */
+    position: relative;
+    z-index: 1;
+  }
+  
+  .title-outline::after {
+    content: "Forest";
+    position: absolute;
+    left: 3px;
+    top: 3px;
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(56, 189, 248, 0.3); /* Subtle Cyan Tint */
+    z-index: -1;
+    mix-blend-mode: screen;
+  }
+}
+
+/* Custom Scrollbar hide */
+::-webkit-scrollbar {
+  display: none;
+}
