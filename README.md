@@ -2,7 +2,6 @@
 
 A high-performance, immersive 3D interactive experience built with **React Three Fiber**, **Three.js**, and **WebGL**. This project features a procedurally generated forest, a dynamic particle snow system, and atmospheric audio, all optimized for modern web browsers.
 
-![Project Preview](https://via.placeholder.com/800x400?text=XYLon+Living+Forest+Preview)
 
 ## ✨ Core Features
 
