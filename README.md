@@ -10,11 +10,6 @@ A high-performance, immersive 3D interactive experience built with **React Three
 * **Procedural Forest**: `InstancedMesh` with custom vertex shaders for wind simulation and mouse interaction — hundreds of trees in a single draw call.
 * **Weather Systems**: Seasonal snow (Winter) and rain (Summer) particle systems with custom shaders for bokeh, velocity-based stretching, and alpha transitions.
 * **Volumetric Campfire**: Ray-marched fire effect (Spring/Autumn) using `@wolffo/three-fire`, with flickering PointLight and depth-aware rendering.
-* **Adaptive Quality**: Automatically adjusts particle count, shadows, and render resolution based on device type (Mobile vs. Desktop).
-* **Smooth Scrolling**: Integrated **Lenis** for inertial scrolling that drives camera movement through the 3D scene.
-* **Atmospheric Audio**: Four-season ambient soundtracks with crossfade transitions, preload optimization, and browser autoplay policy compliance.
-* **Season-Aware Cursor**: Custom cursor with per-season color theming and inertial tracking.
-* **Post-Processing**: Bloom and Noise effects for cinematic visual quality (Desktop only).
 
 ## 🛠 Tech Stack
 
