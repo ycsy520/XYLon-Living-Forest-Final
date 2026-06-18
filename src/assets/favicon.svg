@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>XYLon Living Forest</title>
+
+  <defs>
+    <!-- 星空背景径向渐变：中心深蓝 → 边缘近黑 -->
+    <radialGradient id="bgGrad" gradientUnits="userSpaceOnUse" cx="256" cy="200" r="340">
+      <stop offset="0%"   stop-color="#162a40"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+
+    <!-- 林地雾气光晕：从画面底部向上散逸的暗绿色大气 -->
+    <radialGradient id="fogGlow" gradientUnits="userSpaceOnUse" cx="256" cy="512" r="300">
+      <stop offset="0%"   stop-color="#0f3319" stop-opacity="0.9"/>
+      <stop offset="65%"  stop-color="#091a0e" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- 主树渐变：顶部冷白 → 底部冰蓝 -->
+    <linearGradient id="treeGrad" gradientUnits="userSpaceOnUse" x1="256" y1="100" x2="256" y2="420">
+      <stop offset="0%"   stop-color="#e0eeff"/>
+      <stop offset="100%" stop-color="#8ab8d0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ════════ 背景层 ════════ -->
+  <rect width="512" height="512" fill="#020617"/>
+  <rect width="512" height="512" fill="url(#bgGrad)"/>
+
+  <!-- 林地雾气 -->
+  <ellipse cx="256" cy="512" rx="310" ry="240" fill="url(#fogGlow)"/>
+
+  <!-- ════════ 星空 ════════ -->
+  <g fill="#aaccee">
+    <circle cx="88"  cy="68"  r="2.0" opacity="0.60"/>
+    <circle cx="158" cy="43"  r="1.4" opacity="0.48"/>
+    <circle cx="308" cy="54"  r="1.8" opacity="0.65"/>
+    <circle cx="374" cy="76"  r="1.5" opacity="0.44"/>
+    <circle cx="435" cy="47"  r="1.8" opacity="0.55"/>
+    <circle cx="468" cy="114" r="1.2" opacity="0.38"/>
+    <circle cx="46"  cy="132" r="1.4" opacity="0.40"/>
+  </g>
+
+  <!-- ════════ 远景树（纯三角形剪影，近乎纯黑） ════════ -->
+  <polygon points="52,468  90,348  128,468" fill="#081408" opacity="0.80"/>
+  <polygon points="384,468 422,348 460,468" fill="#081408" opacity="0.80"/>
+
+  <!-- ════════ 中景左侧三层松树 ════════ -->
+  <!-- 锯齿轮廓：每层交界处有 8px 内凹形成分层感 -->
+  <g fill="#0c2314">
+    <polygon points="
+      60,462  96,390  88,390
+      118,320 110,320 142,258
+      174,320 166,320
+      196,390 188,390
+      224,462
+    "/>
+    <rect x="137" y="460" width="10" height="26" rx="2"/>
+  </g>
+
+  <!-- ════════ 中景右侧三层松树 ════════ -->
+  <g fill="#0c2314">
+    <polygon points="
+      288,462 324,390 316,390
+      346,320 338,320 370,258
+      402,320 394,320
+      424,390 416,390
+      452,462
+    "/>
+    <rect x="365" y="460" width="10" height="26" rx="2"/>
+  </g>
+
+  <!-- ════════ 主体中心松树（四层叠加，冷蓝白渐变） ════════ -->
+
+  <!-- 树干 -->
+  <rect x="248" y="418" width="16" height="52" rx="3" fill="#6090a8" opacity="0.58"/>
+
+  <!-- 第一层：最宽底基 -->
+  <polygon points="143,420 256,278 369,420" fill="url(#treeGrad)"/>
+
+  <!-- 第二层 -->
+  <polygon points="172,364 256,212 340,364" fill="url(#treeGrad)"/>
+
+  <!-- 第三层 -->
+  <polygon points="196,307 256,152 316,307" fill="url(#treeGrad)"/>
+
+  <!-- 第四层：顶梢 -->
+  <polygon points="218,250 256,100 294,250" fill="url(#treeGrad)"/>
+
+</svg>

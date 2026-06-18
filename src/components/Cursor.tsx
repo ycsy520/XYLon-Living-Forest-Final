@@ -1,11 +1,22 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { isMobile } from '../utils/Config';
+import { useSeason } from '../context/useSeason';
+
+/**
+ * 将 hex 数值转为 CSS 颜色字符串
+ */
+function hexToCss(hex: number): string {
+  return '#' + hex.toString(16).padStart(6, '0');
+}
 
 export const Cursor: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
   const mouseRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const posRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+
+  const { palette } = useSeason();
+  const cursorColor = useMemo(() => hexToCss(palette.cursorColor), [palette.cursorColor]);
 
   useEffect(() => {
     if (isMobile) return;
@@ -20,8 +31,8 @@ export const Cursor: React.FC = () => {
     };
 
     const animate = () => {
-        posRef.current.x += (mouseRef.current.x - posRef.current.x) * 0.15;
-        posRef.current.y += (mouseRef.current.y - posRef.current.y) * 0.15;
+        posRef.current.x += (mouseRef.current.x - posRef.current.x) * 0.08;
+        posRef.current.y += (mouseRef.current.y - posRef.current.y) * 0.08;
         
         if (cursorRef.current) {
             cursorRef.current.style.left = `${posRef.current.x}px`;
@@ -35,11 +46,9 @@ export const Cursor: React.FC = () => {
 
     const onMouseOver = (e: MouseEvent) => {
         if ((e.target as HTMLElement).closest('a, button, .hover-target')) {
-            cursorRef.current?.classList.add('scale-[3]', 'bg-[#38bdf8]', 'mix-blend-difference');
-            cursorRef.current?.classList.remove('border-[#38bdf8]/50');
+            cursorRef.current?.classList.add('scale-[2]', 'mix-blend-difference');
         } else {
-            cursorRef.current?.classList.remove('scale-[3]', 'bg-[#38bdf8]', 'mix-blend-difference');
-            cursorRef.current?.classList.add('border-[#38bdf8]/50');
+            cursorRef.current?.classList.remove('scale-[2]', 'mix-blend-difference');
         }
     };
 
@@ -56,8 +65,27 @@ export const Cursor: React.FC = () => {
 
   return (
     <>
-      <div ref={cursorRef} className="fixed w-5 h-5 border border-[#38bdf8]/50 rounded-full pointer-events-none z-[10001] -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out" style={{ left: '50%', top: '50%' }}></div>
-      <div ref={dotRef} className="fixed w-1 h-1 bg-[#38bdf8] rounded-full pointer-events-none z-[10001] -translate-x-1/2 -translate-y-1/2" style={{ left: '50%', top: '50%' }}></div>
+      {/* 外环 — 32px，季节着色，不透明度 50% */}
+      <div
+        ref={cursorRef}
+        className="fixed w-8 h-8 border rounded-full pointer-events-none z-[10001] -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-out"
+        style={{
+          left: '50%',
+          top: '50%',
+          borderColor: cursorColor + '80',
+          boxShadow: `0 0 16px ${cursorColor}30`,
+        }}
+      />
+      {/* 中心点 — 6px，季节实心色 */}
+      <div
+        ref={dotRef}
+        className="fixed w-1.5 h-1.5 rounded-full pointer-events-none z-[10001] -translate-x-1/2 -translate-y-1/2"
+        style={{
+          left: '50%',
+          top: '50%',
+          backgroundColor: cursorColor,
+        }}
+      />
     </>
   );
 };

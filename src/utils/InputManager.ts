@@ -5,22 +5,38 @@ class InputManager {
     y = 0;
     targetX = 0;
     targetY = 0;
+    private _rafId = 0;
+    private _boundUpdate!: () => void;
+    private _boundOnMouse!: (e: MouseEvent) => void;
+    private _boundOnGyro!: (e: DeviceOrientationEvent) => void;
+    private _boundOnTouch!: (e: TouchEvent) => void;
 
     constructor() {
         if (typeof window === 'undefined') return;
+        // H-01 修复：预绑定函数引用，确保 removeEventListener 能正确移除
+        this._boundUpdate = this.update.bind(this);
+        this._boundOnMouse = this.onMouse.bind(this);
+        this._boundOnGyro = this.onGyro.bind(this);
+        this._boundOnTouch = this.onTouch.bind(this);
         this.init();
     }
 
     init() {
         if (isMobile) {
-            window.addEventListener("deviceorientation", this.onGyro.bind(this));
-            window.addEventListener("touchmove", this.onTouch.bind(this), { passive: false });
+            window.addEventListener("deviceorientation", this._boundOnGyro);
+            window.addEventListener("touchmove", this._boundOnTouch, { passive: false });
         } else {
-            window.addEventListener("mousemove", this.onMouse.bind(this));
+            window.addEventListener("mousemove", this._boundOnMouse);
         }
-        
-        // Start update loop
-        this.update();
+        this._rafId = requestAnimationFrame(this._boundUpdate);
+    }
+
+    /** H-01 修复：停止 RAF 循环并移除事件监听（HMR / 组件卸载时调用） */
+    destroy() {
+        cancelAnimationFrame(this._rafId);
+        window.removeEventListener("mousemove", this._boundOnMouse);
+        window.removeEventListener("deviceorientation", this._boundOnGyro);
+        window.removeEventListener("touchmove", this._boundOnTouch);
     }
 
     onMouse(e: MouseEvent) {
@@ -42,10 +58,10 @@ class InputManager {
         this.targetY = -(t.clientY / window.innerHeight) * 2 + 1;
     }
 
-    update = () => {
+    update() {
         this.x += (this.targetX - this.x) * 0.05;
         this.y += (this.targetY - this.y) * 0.05;
-        requestAnimationFrame(this.update);
+        this._rafId = requestAnimationFrame(this._boundUpdate);
     }
 }
 

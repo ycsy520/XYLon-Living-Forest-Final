@@ -1,5 +1,5 @@
 {
-  "name": "temp-app",
+  "name": "xylon-living-forest",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,22 +10,19 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/three": "^0.183.1",
+    "@wolffo/three-fire": "^1.4.0",
     "autoprefixer": "^10.4.27",
-    "clsx": "^2.1.1",
     "gsap": "^3.14.2",
     "lenis": "^1.3.18-dev.0",
     "postcss": "^8.5.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
-    "three": "^0.183.2",
-    "uuid": "^13.0.0"
+    "three": "^0.183.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -15,7 +15,11 @@
     --accent-color: var(--color-accent-color);
   }
 
-  html, body {
+  html {
+    overflow: hidden;
+  }
+
+  body {
     width: 100%;
     min-height: 100%;
     margin: 0;
@@ -25,6 +29,7 @@
     color: var(--text-color);
     font-family: "Inter", sans-serif;
     overflow-x: hidden;
+    overflow-y: auto;
     cursor: none;
     -webkit-user-select: none;
     user-select: none;

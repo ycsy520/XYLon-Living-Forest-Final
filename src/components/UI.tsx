@@ -2,6 +2,17 @@ import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
 import { AudioEngine } from '../utils/AudioEngine';
 import { isMobile } from '../utils/Config';
+import { useSeason } from '../context/useSeason';
+import type { Season } from '../context/SeasonPalette';
+
+const SEASON_LABELS: Record<Season, string> = {
+  spring: 'SPRING',
+  summer: 'SUMMER',
+  autumn: 'AUTUMN',
+  winter: 'WINTER',
+};
+
+const SEASON_ORDER: Season[] = ['spring', 'summer', 'autumn', 'winter'];
 
 interface UIProps {
   onEnter: () => void;
@@ -12,6 +23,7 @@ export const UI: React.FC<UIProps> = ({ onEnter }) => {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const loaderRef = useRef<HTMLDivElement>(null);
   const enterBtnRef = useRef<HTMLButtonElement>(null);
+  const { season, setSeason } = useSeason();
 
   useEffect(() => {
     // Loader Logic
@@ -69,7 +81,7 @@ export const UI: React.FC<UIProps> = ({ onEnter }) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (DeviceOrientationEvent as any).requestPermission().catch(console.error);
     }
-    AudioEngine.resume();
+    AudioEngine.start().catch(console.error);
 
     gsap.to(loaderRef.current, {
       yPercent: -100,
@@ -120,8 +132,19 @@ export const UI: React.FC<UIProps> = ({ onEnter }) => {
       {/* MAIN UI */}
       <nav className="fixed top-0 left-0 w-full px-6 py-6 md:px-8 md:py-8 flex justify-between items-center z-50 mix-blend-difference text-white pointer-events-auto">
         <a href="#" className="text-sm md:text-lg font-bold tracking-[0.2em] brand-font hover-target opacity-0 intro-anim translate-y-10">XYLON</a>
-        <div className="flex gap-4 md:gap-8 text-[10px] md:text-xs uppercase tracking-widest opacity-0 intro-anim translate-y-10">
-          <span>Vol. 03</span>
+        <div className="flex gap-3 md:gap-6 text-[10px] md:text-xs uppercase tracking-widest opacity-0 intro-anim translate-y-10 items-center">
+          {SEASON_ORDER.map((s) => (
+            <span
+              key={s}
+              className={`cursor-pointer transition-colors duration-300 hover-target ${
+                season === s ? 'text-[#38bdf8]' : 'text-white/40 hover:text-white/80'
+              }`}
+              onClick={() => setSeason(s)}
+            >
+              {SEASON_LABELS[s]}
+            </span>
+          ))}
+          <span className="text-white/20">|</span>
           <span 
             className="cursor-pointer hover:text-indigo-400 transition-colors"
             onClick={() => AudioEngine.toggle()}
