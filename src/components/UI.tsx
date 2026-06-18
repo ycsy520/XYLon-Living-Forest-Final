@@ -106,8 +106,8 @@ export const UI: React.FC<UIProps> = ({ onEnter }) => {
     <>
       {/* LOADER */}
       <div id="loader" ref={loaderRef} className="fixed inset-0 z-[10000] bg-black flex flex-col justify-center items-center transition-transform duration-1000 ease-[cubic-bezier(0.7,0,0.3,1)]">
-        <div className="relative w-[300px] h-[100px] text-center">
-          <div className="decode-text font-syne text-[3rem] font-extrabold tracking-[0.2em] text-white uppercase" id="decode-target">XYLON</div>
+        <div className="relative w-[800px] h-[100px] text-center">
+          <div className="decode-text font-syne text-[3rem] font-extrabold tracking-[0.2em] text-white uppercase" id="decode-target">LIVING FOREST</div>
         </div>
         
         <button
