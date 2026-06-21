@@ -21,6 +21,7 @@ import { Forest } from './Forest';
 import { WinterSnow } from './weather/WinterSnow';
 import { SummerRain } from './weather/SummerRain';
 import { Campfire } from './Campfire';
+import { CanvasErrorBoundary } from './CanvasErrorBoundary';
 
 /**
  * CameraController - 摄像机控制组件
@@ -195,11 +196,13 @@ export const Scene: React.FC = () => {
       >
         <SceneLighting />
 
-        <Suspense fallback={null}>
-            <Campfire />
-            <SceneForest />
-            <WeatherSwitcher />
-        </Suspense>
+        <CanvasErrorBoundary>
+          <Suspense fallback={null}>
+              <Campfire />
+              <SceneForest />
+              <WeatherSwitcher />
+          </Suspense>
+        </CanvasErrorBoundary>
 
         <CameraController scrollProgress={scrollProgress} />
 
