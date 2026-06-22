@@ -113,7 +113,7 @@ export const Campfire: React.FC = () => {
       const name = child.name.toLowerCase();
 
       if (name.includes('wood') && name.includes('ground')) {
-        child.visible = false;
+        //child.visible = false;
         return;
       }
       if (name.includes('camp')) {
@@ -131,16 +131,18 @@ export const Campfire: React.FC = () => {
     });
   }, [fbx, campDiffuse, campNormal, rocksDiffuse, rocksNormal, woodsDiffuse, woodsGlow]);
 
-  /** PointLight 闪烁动画（仅春秋） */
+  /** PointLight — 春秋闪烁火光，冬夏稳定低亮度灯光 */
   useFrame(({ clock }) => {
     if (!lightRef.current) return;
-    if (!fireActive) {
-      lightRef.current.intensity = 0;
-      return;
+    if (fireActive) {
+      const t = clock.getElapsedTime();
+      const flicker = 1 + Math.sin(t * 8) * 0.12 + Math.sin(t * 13) * 0.06 + Math.sin(t * 21) * 0.03;
+      lightRef.current.intensity = 8 * flicker;
+      lightRef.current.color.set(0xff6622);
+    } else {
+      lightRef.current.intensity = 7;
+      lightRef.current.color.set(0xff8833);
     }
-    const t = clock.getElapsedTime();
-    const flicker = 1 + Math.sin(t * 8) * 0.12 + Math.sin(t * 13) * 0.06 + Math.sin(t * 21) * 0.03;
-    lightRef.current.intensity = 8 * flicker;
   });
 
   /** 卸载时释放 GPU 资源（不 dispose 由 useLoader 缓存的纹理） */
@@ -192,11 +194,11 @@ export const Campfire: React.FC = () => {
       {/* 点光源 — 春秋闪烁，夏冬关闭 */}
       <pointLight
         ref={lightRef}
-        position={[0, 8, 0]}
+        position={[-14, 1, 2]}
         color={0xff6622}
-        intensity={fireActive ? 8 : 0}
+        intensity={1}
         distance={30}
-        decay={2}
+        decay={1.5}
         castShadow
       />
     </group>
